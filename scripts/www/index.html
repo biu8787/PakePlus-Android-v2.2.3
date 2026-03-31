@@ -1,11 +1,330 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus</title>
-    </head>
-    <body>
-        PakePlus
-    </body>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大方板门头方钢及铝塑板用量计算 By:1507572666 2025年2月10日</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            font-family: 'PingFang SC', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FFB6C1, #FF6347, #20B2AA, #87CEEB);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            color: #333;
+        }
+        .container {
+            width: 100%; max-width: 750px; margin: 40px auto; padding: 35px;
+            background: rgba(255,255,255,0.97); border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: all 0.3s ease;
+        }
+        .container:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
+        h1 { font-size: 2.5rem; text-align: center; color: #2c3e50; margin-bottom: 35px; font-weight: 700; }
+        
+        .input-group { margin-bottom: 25px; width: 100%; }
+        
+        /* 新增：用于水平排列的样式 */
+        .flex-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .flex-row label { margin-bottom: 0; }
+
+        label { display: block; font-size: 1.2rem; color: #34495e; margin-bottom: 8px; font-weight: 500; }
+        
+        input[type="number"] {
+            width: 100%; 
+            padding: 14px 18px; 
+            font-size: 1.1rem; 
+            border: 2px solid #e0e6e9;
+            border-radius: 10px; 
+            outline: none; 
+            background: #f9fafb;
+            display: block;
+        }
+        
+        input[type="number"]:focus { border-color: #00C4B4; box-shadow: 0 0 10px rgba(0,196,180,0.4); }
+        input[type="checkbox"], input[type="radio"] { width: auto; margin-right: 10px; vertical-align: middle; }
+        input[disabled] { background: #ecf0f1; cursor: not-allowed; }
+        
+        button {
+            width: 100%; padding: 16px; background: linear-gradient(90deg, #00C4B4, #0288D1);
+            color: white; font-size: 1.3rem; font-weight: 600; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 12px;
+        }
+        button:hover { background: linear-gradient(90deg, #0288D1, #00C4B4); transform: scale(1.03); }
+        #resetBtn { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+        #resetBtn:hover { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+        
+        h3 { color: #0288D1; font-size: 1.5rem; margin-bottom: 20px; font-weight: 600; border-bottom: 2px solid #e0e6e9; padding-bottom: 5px; }
+        .result { margin-top: 30px; padding: 25px; background: rgba(245,245,245,0.95); border-radius: 15px; border-left: 5px solid #00C4B4; }
+        .result table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .result th, .result td { padding: 12px 15px; border: 1px solid #e0e6e9; text-align: left; }
+        .result th { background: #f1f2f6; color: #2d3436; font-weight: 600; }
+        .result td { background: #fff; color: #636e72; }
+        .highlight { font-weight: bold; color: #d63031; }
+        footer { margin-top: auto; padding: 15px; text-align: center; font-size: 0.95rem; color: #7f8c8d; background: rgba(255,255,255,0.85); border-top: 1px solid #e0e6e9; }
+        @media (max-width: 600px) { .container { margin: 20px; padding: 25px; } h1 { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>大方板门头用料计算器</h1>
+        <div class="input-group">
+            <label for="length">长度 (m):</label>
+            <input type="number" id="length" placeholder="输入门头长度" min="0" step="0.01">
+        </div>
+        
+        <div class="input-group">
+            <label for="height">高度 (m):</label>
+            <input type="number" id="height" placeholder="输入门头高度" min="0" step="0.01">
+        </div>
+        
+        <div class="input-group flex-row">
+            <div>
+                <label for="thickness" style="margin-bottom: 0;">是否计算厚度:</label>
+                <input type="checkbox" id="thickness"> 是
+            </div>
+            <div id="sideMaterialContainer">
+                <label style="margin-bottom: 0;">侧面材料:</label>
+                <input type="radio" id="sideAlu" name="sideMaterial" value="alu" checked> 铝塑板
+                <input type="radio" id="sideDafang" name="sideMaterial" value="dafang"> 大方板
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="calcStrip">计算边条:</label>
+            <input type="checkbox" id="calcStrip" checked> <span class="checkbox-label">是</span>
+            <input type="checkbox" id="strip244" checked> <span class="checkbox-label">2.44米</span>
+            <input type="checkbox" id="strip300"> <span class="checkbox-label">3.00米</span>
+        </div>
+        <div class="input-group">
+            <label for="thicknessValue">厚度 (cm, 若计算厚度):</label>
+            <input type="number" id="thicknessValue" placeholder="输入厚度" min="0" step="0.01" disabled>
+        </div>
+        
+        <div class="input-group" id="sideOptions" style="display: none;">
+            <label>侧面计算选项:</label>
+            <div style="display: flex; gap: 20px; flex-wrap: nowrap;">
+                <div><input type="checkbox" id="topSide" checked> <label for="topSide">上顶方钢及铝塑板</label></div>
+                <div><input type="checkbox" id="bottomSide" checked> <label for="bottomSide">下底方钢及铝塑板</label></div>
+                <div><input type="checkbox" id="leftSide" checked> <label for="leftSide">左侧方钢及铝塑板</label></div>
+                <div><input type="checkbox" id="rightSide" checked> <label for="rightSide">右侧方钢及铝塑板</label></div>
+            </div>
+            <div style="margin-top: 10px;">
+                <input type="checkbox" id="calcSideSteel"> <label for="calcSideSteel">侧面方管间距按1.22m计算</label>
+            </div>
+        </div>
+
+        <button onclick="calculateSteelUsage()">计算用料</button>
+        <button id="resetBtn" onclick="resetForm()" style="margin-top: 15px;">重置</button>
+
+        <div class="result" id="result">
+            <h3>计算结果</h3>
+            <p>请在上方输入数据并点击“计算用料”以查看结果。</p>
+        </div>
+    </div>
+    <footer>© 2026 大方板门头用料计算器（3.11更新）   By:1507572666</footer>
+
+    <script>
+        document.getElementById('thickness').addEventListener('change', function() {
+            document.getElementById('thicknessValue').disabled = !this.checked;
+            document.getElementById('sideOptions').style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('strip244').addEventListener('change', function() {
+            if (this.checked) document.getElementById('strip300').checked = false;
+        });
+        document.getElementById('strip300').addEventListener('change', function() {
+            if (this.checked) document.getElementById('strip244').checked = false;
+        });
+
+        function calculateSteelUsage() {
+            let length = parseFloat(document.getElementById('length').value);
+            let height = parseFloat(document.getElementById('height').value);
+            let isThicknessChecked = document.getElementById('thickness').checked;
+            let thickness = isThicknessChecked ? parseFloat(document.getElementById('thicknessValue').value) / 100 : 0;
+            const calcStrip = document.getElementById('calcStrip').checked;
+            const strip244 = document.getElementById('strip244').checked;
+            const strip300 = document.getElementById('strip300').checked;
+            const stripLength = strip300 ? 3.00 : 2.44;
+            const sideMaterial = document.querySelector('input[name="sideMaterial"]:checked')?.value || 'alu';
+
+            if (isNaN(length) || isNaN(height) || length <= 0 || height <= 0 ||
+                (isThicknessChecked && (isNaN(thickness) || thickness <= 0.07))) {
+                document.getElementById('result').innerHTML = '<p style="color:#e63946;">请输入有效的数值（长度和高度需大于0，厚度需大于7cm）</p>';
+                return;
+            }
+
+            const dafangWidth = 0.5; // 大方板宽度0.5米
+            // 正面大方板：按长度÷0.5向上取整（原有逻辑）
+            const frontBlocks = Math.ceil(length / dafangWidth);
+            let dafangHtml = `
+                <h3>大方板用量</h3>
+                <table>
+                    <tr><th>项目</th><th>数量</th><th>规格</th></tr>
+                    <tr><td>正面大方板</td><td>${frontBlocks} 块</td><td>× ${height.toFixed(2)} 米</td></tr>
+            `;
+
+            let totalDafangBlocks = frontBlocks;
+            const frameThickness = 0.045;
+            const perimeter = 2 * (length + height);
+            let horizontalBars = Math.ceil(length / 1.5) + 1;
+            if (horizontalBars < 2) horizontalBars = 2;
+            const remainingLength = length - (frameThickness * horizontalBars);
+            const horizontalSpacing = horizontalBars > 1 ? (remainingLength / (horizontalBars - 1)) * 100 : 0;
+            const singleHorizontalBarLength = Math.max(height - 0.09, 0);
+            const totalHorizontalSteel = (horizontalBars - 2) * singleHorizontalBarLength;
+            const maxVerticalSpacing = 1.2;
+            let verticalBars = Math.ceil(height / maxVerticalSpacing) - 1;
+            if (verticalBars < 1) verticalBars = 1;
+            const verticalBarLength = length - 2 * frameThickness;
+            const totalVerticalSteel = verticalBars * verticalBarLength;
+            const totalVerticalBars = verticalBars + 2;
+            const verticalSpacing = totalVerticalBars > 1 ? ((height - totalVerticalBars * frameThickness) / (totalVerticalBars - 1)) * 100 : 0;
+            const totalFrontSteel = perimeter + totalHorizontalSteel + totalVerticalSteel;
+            
+            // 计算上下方钢数量（根数）
+            const verticalSteelBars = Math.ceil(totalVerticalSteel / 6);
+            
+            // 新逻辑：正面+左右+上下数量总和 + 10%损耗 向上取整
+            const totalSteelBarsSum = horizontalBars + totalVerticalBars + verticalSteelBars;
+            const steelBarsWithLoss = totalSteelBarsSum * 1.1;
+            const frontSteelBars = Math.ceil(steelBarsWithLoss);
+
+            const panelWidth = 1.22;
+            const panelHeight = 2.44;
+            const panelArea = panelWidth * panelHeight;
+            let totalPanels = 0;
+            let panelResultHtml = '<h3>铝塑板用料</h3><table><tr><th>项目</th><th>值</th></tr>';
+
+            if (isThicknessChecked && thickness > 0) {
+                const calcTop = document.getElementById('topSide').checked;
+                const calcBottom = document.getElementById('bottomSide').checked;
+                const calcLeft = document.getElementById('leftSide').checked;
+                const calcRight = document.getElementById('rightSide').checked;
+
+                if (sideMaterial === 'dafang') {
+                    if (calcTop) {
+                        const topArea = length * (thickness + 0.10);
+                        const topPanels = Math.ceil(topArea / panelArea);
+                        panelResultHtml += `<tr><td>上顶铝塑板</td><td>${topPanels} 张</td></tr>`;
+                        totalPanels += topPanels;
+                    }
+                    // 下底大方板：原有逻辑不变
+                    if (calcBottom) {
+                        const bottomBlocks = Math.ceil(length / height);
+                        dafangHtml += `<tr><td>下底大方板</td><td>${bottomBlocks} 块</td><td>× ${height.toFixed(2)} 米</td></tr>`;
+                        totalDafangBlocks += bottomBlocks;
+                    }
+                    // 核心修复：左右侧大方板计算逻辑
+                    // 1. 单侧数量 = 厚度(m) ÷ 0.5 向上取整（按需求规则）
+                    const sideBlockPerSide = Math.ceil(thickness / dafangWidth);
+                    // 2. 总侧数量 = 左侧数量 + 右侧数量
+                    let sideTotalBlocks = 0;
+                    if (calcLeft) sideTotalBlocks += sideBlockPerSide;
+                    if (calcRight) sideTotalBlocks += sideBlockPerSide;
+                    
+                    // 3. 展示逻辑修复：区分单侧/双侧，显示正确数量
+                    if (sideTotalBlocks > 0) {
+                        let sideLabel = '';
+                        let sideDisplayBlocks = 0;
+                        if (calcLeft && calcRight) {
+                            sideLabel = '左右大方板';
+                            sideDisplayBlocks = sideTotalBlocks; // 双侧显示总和
+                        } else if (calcLeft) {
+                            sideLabel = '左侧大方板';
+                            sideDisplayBlocks = sideBlockPerSide; // 仅左侧显示单侧数
+                        } else if (calcRight) {
+                            sideLabel = '右侧大方板';
+                            sideDisplayBlocks = sideBlockPerSide; // 仅右侧显示单侧数
+                        }
+                        dafangHtml += `<tr><td>${sideLabel}</td><td>${sideDisplayBlocks} 块</td><td>× ${height.toFixed(2)} 米</td></tr>`;
+                        totalDafangBlocks += sideTotalBlocks; // 总计累加双侧数量
+                    }
+                } else {
+                    if (calcTop) {
+                        const topArea = length * (thickness + 0.10);
+                        const topPanels = Math.ceil(topArea / panelArea);
+                        panelResultHtml += `<tr><td>上顶铝塑板</td><td>${topPanels} 张</td></tr>`;
+                        totalPanels += topPanels;
+                    }
+                    if (calcBottom) {
+                        const bottomArea = length * thickness;
+                        const bottomPanels = Math.ceil(bottomArea / panelArea);
+                        panelResultHtml += `<tr><td>下底铝塑板</td><td>${bottomPanels} 张</td></tr>`;
+                        totalPanels += bottomPanels;
+                    }
+                    let sideArea = 0;
+                    if (calcLeft) sideArea += height * thickness;
+                    if (calcRight) sideArea += height * thickness;
+                    if (sideArea > 0) {
+                        const sidePanels = Math.ceil(sideArea / panelArea);
+                        panelResultHtml += `<tr><td>左右侧铝塑板</td><td>${sidePanels} 张</td></tr>`;
+                        totalPanels += sidePanels;
+                    }
+                }
+                if (totalPanels > 0) {
+                    panelResultHtml += `<tr><td class="highlight">铝塑板总张数</td><td class="highlight">${totalPanels} 张</td></tr></table>`;
+                } else {
+                    panelResultHtml = '';
+                }
+            }
+
+            dafangHtml += `<tr><td class="highlight">大方板总块数</td><td class="highlight" colspan="2">${totalDafangBlocks} 块</td></tr></table>`;
+            let resultHtml = dafangHtml + (panelResultHtml || '');
+            resultHtml += `
+                <h3>门头方钢用量详情</h3>
+                <table>
+                    <tr><th>项目</th><th>值</th></tr>
+                    <tr><td>正面周长</td><td>${perimeter.toFixed(2)} 米</td></tr>
+                    <tr><td>正面左右间距</td><td>${horizontalSpacing.toFixed(2)} cm</td></tr>
+                    <tr><td>正面用量米数</td><td>${totalFrontSteel.toFixed(2)} 米</td></tr>
+                    <tr><td>正面方钢数量</td><td>${horizontalBars} 根</td></tr>
+                    <tr><td>左右间距</td><td>${verticalSpacing.toFixed(2)} cm</td></tr>
+                    <tr><td>左右方钢用量</td><td>${totalHorizontalSteel.toFixed(2)} 米</td></tr>
+                    <tr><td>左右方钢数量</td><td>${totalVerticalBars} 根</td></tr>
+                    <tr><td>上下方钢用量</td><td>${totalVerticalSteel.toFixed(2)} 米</td></tr>
+                    <tr><td>上下方钢数量</td><td>${verticalSteelBars} 根</td></tr>
+                    <tr><td>方管所需总数</td><td>${frontSteelBars} 根</td></tr>
+                </table>
+            `;
+
+            if (calcStrip) {
+                const stripDivider = stripLength === 2.44 ? 1.22 : 1.5;
+                const stripCount = Math.ceil((perimeter / stripDivider) / 2);
+                resultHtml += `
+                    <h3>边条用量</h3>
+                    <table>
+                        <tr><th>项目</th><th>值</th></tr>
+                        <tr><td>周长</td><td>${perimeter.toFixed(2)} 米</td></tr>
+                        <tr><td>边条长度</td><td>${stripLength} 米</td></tr>
+                        <tr><td>所需边条数量</td><td>${stripCount} 根</td></tr>
+                    </table>
+                `;
+            }
+            document.getElementById('result').innerHTML = resultHtml;
+        }
+
+        function resetForm() {
+            ['length','height','thicknessValue'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('thicknessValue').disabled = true;
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('calcStrip').checked = true;
+            document.getElementById('strip244').checked = true;
+            document.getElementById('topSide').checked = true;
+            document.getElementById('bottomSide').checked = true;
+            document.getElementById('leftSide').checked = true;
+            document.getElementById('rightSide').checked = true;
+            document.getElementById('sideAlu').checked = true;
+            document.getElementById('sideOptions').style.display = 'none';
+            document.getElementById('result').innerHTML = '<h3>计算结果</h3><p>请在上方输入数据并点击“计算用料”以查看结果。</p>';
+        }
+    </script>
+</body>
 </html>
